@@ -1,8 +1,9 @@
-const nodeHtmlToImage = require("node-html-to-image");
-const fs = require("fs");
-const path = require("path");
-const mongoose = require("mongoose");
-const { MongoClient, GridFSBucket } = require("mongodb");
+import nodeHtmlToImage from "node-html-to-image";
+import fs from "fs";
+import path from "path";
+import mongoose from "mongoose";
+import { MongoClient, GridFSBucket } from "mongodb";
+
 const mongoURI = process.env.MONGO_URI;
 const dataBaseName = process.env.DATABASE_NAME;
 
@@ -26,7 +27,7 @@ async function generateAdmitCard(info) {
     const logoPath = path.join(__dirname, "assets", "logo.png");
 
     const logoBase64 = fs.readFileSync(logoPath, { encoding: "base64" });
-    const logoSrc = `data:image/png;base64,${logoBase64}`; // change to image/jpeg if your file is .jpg
+    const logoSrc = `data:image/png;base64,${logoBase64}`; 
 
     await nodeHtmlToImage({
       output: outputPath,
@@ -203,8 +204,7 @@ async function fetchAdmitCardFromDB(studentName, res) {
   }
 }
 
-
-module.exports = {
+export {
   generateAdmitCard,
   dbConnection,
   uploadAdmitCard,

@@ -519,7 +519,6 @@ app.delete("/school/:schoolCode", async (req, res) => {
 });
 
 app.post("/add-school", async (req, res) => {
-  console.log(req.body);
 
   try {
     const newSchool = new School(req.body);
@@ -623,4 +622,4 @@ app.listen(PORT, () => {
   console.log(`Server is UP and RUNNING on port ${PORT}`);
 });
 
-export default app; // Optional, if you need to import app elsewhere
+export default app;
