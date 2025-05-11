@@ -437,7 +437,6 @@ app.post("/upload-schooldata", upload.single("file"), async (req, res) => {
 
 // API to upload student data in bulk
 app.post("/upload-studentData", upload.single("file"), async (req, res) => {
-  console.log("CHAL TO RAHA HAI");
 
   if (!req.file) {
     return res.status(400).json({ message: "Please upload a CSV file" });
