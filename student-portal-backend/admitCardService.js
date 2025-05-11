@@ -3,6 +3,10 @@ import fs from "fs";
 import path from "path";
 import mongoose from "mongoose";
 import { MongoClient, GridFSBucket } from "mongodb";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const mongoURI = process.env.MONGO_URI;
 const dataBaseName = process.env.DATABASE_NAME;
@@ -13,11 +17,11 @@ async function databaseConnection() {
   return { conn: client.db(dataBaseName), status: "success" };
 }
 
-async function generateAdmitCard(info) {
+async function generateAdmitCard(info, level, session) {
   try {
     const outputDir = "./outputs";
     clearOutputDirectory(outputDir);
-    const outputPath = `./outputs/admitCard_${info["Student's Name"]}.png`;
+    const outputPath = `./outputs/admitCard_${info["Student's Name"]}-${level}.png`;
 
     const templatePath = path.join(__dirname, "designs", "admitCard.html");
     if (!fs.existsSync(templatePath)) {
@@ -27,7 +31,14 @@ async function generateAdmitCard(info) {
     const logoPath = path.join(__dirname, "assets", "logo.png");
 
     const logoBase64 = fs.readFileSync(logoPath, { encoding: "base64" });
-    const logoSrc = `data:image/png;base64,${logoBase64}`; 
+    const logoSrc = `data:image/png;base64,${logoBase64}`;
+    const suffix = level.toLowerCase() === "basic" ? "Basic Level" : "Advance Level";
+    const subjectLevel = level.toLowerCase() === "basic" ? "Basic" : "Advance";
+    const IAOL = info[`IAOL ${subjectLevel}`] === "1";
+    const ITSTL = info[`ITSTL ${subjectLevel}`] === "1";
+    const IMOL = info[`IMOL ${subjectLevel}`] === "1";
+    const IGKOL = info[`IGKOL ${subjectLevel}`] === "1";
+    const IENGOL = info[`IGENOL ${subjectLevel}`] === "1";
 
     await nodeHtmlToImage({
       output: outputPath,
@@ -47,8 +58,15 @@ async function generateAdmitCard(info) {
         state: info["State"],
         country: info["Country"],
         examCenter: info["Exam Centre"],
+        level: suffix,
+        session: session,
         qrUrl:
           "https://api.qrserver.com/v1/create-qr-code/?data=https://wa.me/919999999999&size=100x100",
+        IAOL,
+        ITSTL,
+        IMOL,
+        IGKOL,
+        IENGOL,
       },
       puppeteerArgs: {
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -113,9 +131,9 @@ async function dbConnection() {
   }
 }
 
-async function uploadAdmitCard(studentData, res) {
+async function uploadAdmitCard(studentData, res, level) {
   try {
-    const admitCardPath = `./outputs/admitCard_${studentData["Student's Name"]}.png`;
+    const admitCardPath = `./outputs/admitCard_${studentData["Student's Name"]}-${level}.png`;
     if (!fs.existsSync(admitCardPath)) {
       throw new Error("Admit card file does not exist.");
     }
@@ -130,7 +148,7 @@ async function uploadAdmitCard(studentData, res) {
 
     const existingFiles = await db
       .collection("admitCards.files")
-      .findOne({ filename: `admitCard_${studentData["Student's Name"]}.png` });
+      .findOne({ filename: `admitCard_${studentData["Student's Name"]}-${level}.png` });
 
     if (existingFiles) {
       return res.status(200).json({
@@ -142,7 +160,7 @@ async function uploadAdmitCard(studentData, res) {
     const fileStream = fs.createReadStream(admitCardPath);
 
     const writeStream = gfs.openUploadStream(
-      `admitCard_${studentData["Student's Name"]}.png`,
+      `admitCard_${studentData["Student's Name"]}-${level}.png`,
       {
         contentType: "image/png",
         metadata: {
@@ -178,7 +196,7 @@ async function uploadAdmitCard(studentData, res) {
   }
 }
 
-async function fetchAdmitCardFromDB(studentName, res) {
+async function fetchAdmitCardFromDB(studentName, res, level) {
   try {
     const dbResponse = await databaseConnection();
     if (dbResponse.status !== "success") {
@@ -189,7 +207,7 @@ async function fetchAdmitCardFromDB(studentName, res) {
     const gfs = new GridFSBucket(db, { bucketName: "admitCards" });
     const fileExists = await db
       .collection("admitCards.files")
-      .findOne({ filename: `admitCard_${studentName}.png` });
+      .findOne({ filename: `admitCard_${studentName}-${level}.png` });
 
     if (!fileExists) {
       return res.status(404).json({ error: "Admit card not found" });
