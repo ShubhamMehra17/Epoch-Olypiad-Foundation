@@ -631,72 +631,99 @@ async function uploadAdmitCard(students, level, db) {
 //   }
 // }
 
-const sanitize = (str) => str.replace(/[^a-zA-Z0-9-_ ]/g, '').toUpperCase().trim(); // Simple sanitization
+// const sanitize = (str) => str.replace(/[^a-zA-Z0-9-_ ]/g, '').toUpperCase().trim(); // Simple sanitization
+
+// async function fetchAdmitCardFromDB(studentId, studentName, level, res) {
+//   let db, readStream;
+//   try {
+//     // Get database connection
+//     const dbResponse = await databaseConnection();
+//     if (!dbResponse || dbResponse.status !== 'success' || !dbResponse.conn) {
+//       console.error('Database connection failed:', dbResponse);
+//       return res.status(500).json({ error: 'Database connection failed' });
+//     }
+
+//     // Use correct database name
+//     db = dbResponse.conn.db ? dbResponse.conn.db('Epoch-olympiad-foundation') : dbResponse.conn;
+//     if (!db || typeof db.collection !== 'function') {
+//       console.error('Invalid database object:', db);
+//       return res.status(500).json({ error: 'Invalid database object' });
+//     }
+//     // Ensure studentId is an ObjectId
+//     let objectId;
+//     try {
+//       objectId = new ObjectId(studentId);
+//     } catch (error) {
+//       console.error('Invalid student ID format:', studentId);
+//       return res.status(400).json({ error: 'Invalid student ID format' });
+//     }
+
+//     // Rest of the function remains the same
+//     const gfs = new GridFSBucket(db, { bucketName: 'admitCards' });
+//     const safeStudentName = sanitize(studentName || 'student');
+//     const filename = `admitCard_${safeStudentName}-${level}-${studentId}.png`;
+
+//     const file = await db.collection('admitCards.files').findOne({ filename });
+
+//     if (!file) {
+//       return res.status(404).json({ error: 'Admit card not found' });
+//     }
+
+//     res.setHeader('Content-Type', 'image/png');
+//     res.setHeader(
+//       'Content-Disposition',
+//       `attachment; filename="admitCard_${safeStudentName}-${level}.png"`
+//     );
+
+//     readStream = gfs.openDownloadStream(file._id);
+//     readStream.pipe(res);
+
+//     readStream.on('error', (error) => {
+//       console.error('Error streaming admit card:', error);
+//       if (!res.headersSent) {
+//         res.status(500).json({ error: 'Failed to stream admit card' });
+//       }
+//     });
+
+//     readStream.on('end', () => {
+//       console.log('Admit card streamed successfully');
+//     });
+//   } catch (error) {
+//     console.error('Error fetching admit card:', error);
+//     if (!res.headersSent) {
+//       res.status(500).json({ error: `Failed to fetch admit card: ${error.message}` });
+//     }
+//   } finally {
+//     if (readStream) {
+//       readStream.destroy();
+//     }
+//   }
+// }
+
 
 async function fetchAdmitCardFromDB(studentId, studentName, level, res) {
-  let db, readStream;
   try {
-    // Get database connection
     const dbResponse = await databaseConnection();
-    if (!dbResponse || dbResponse.status !== 'success' || !dbResponse.conn) {
-      console.error('Database connection failed:', dbResponse);
-      return res.status(500).json({ error: 'Database connection failed' });
+    if (dbResponse.status !== "success") {
+      return res.status(500).json({ error: "Database connection failed" });
     }
 
-    // Use correct database name
-    db = dbResponse.conn.db ? dbResponse.conn.db('Epoch-olympiad-foundation') : dbResponse.conn;
-    if (!db || typeof db.collection !== 'function') {
-      console.error('Invalid database object:', db);
-      return res.status(500).json({ error: 'Invalid database object' });
-    }
-    // Ensure studentId is an ObjectId
-    let objectId;
-    try {
-      objectId = new ObjectId(studentId);
-    } catch (error) {
-      console.error('Invalid student ID format:', studentId);
-      return res.status(400).json({ error: 'Invalid student ID format' });
+    const db = dbResponse.conn;
+    const gfs = new GridFSBucket(db, { bucketName: "admitCards" });
+    const fileExists = await db
+      .collection("admitCards.files")
+      .findOne({ filename: `admitCard_${studentName}-${level}-${studentId}.png` });
+
+    if (!fileExists) {
+      return res.status(404).json({ error: "Admit card not found" });
     }
 
-    // Rest of the function remains the same
-    const gfs = new GridFSBucket(db, { bucketName: 'admitCards' });
-    const safeStudentName = sanitize(studentName || 'student');
-    const filename = `admitCard_${safeStudentName}-${level}-${studentId}.png`;
-
-    const file = await db.collection('admitCards.files').findOne({ filename });
-
-    if (!file) {
-      return res.status(404).json({ error: 'Admit card not found' });
-    }
-
-    res.setHeader('Content-Type', 'image/png');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="admitCard_${safeStudentName}-${level}.png"`
-    );
-
-    readStream = gfs.openDownloadStream(file._id);
+    res.setHeader("Content-Type", "image/png");
+    const readStream = gfs.openDownloadStream(fileExists._id);
     readStream.pipe(res);
-
-    readStream.on('error', (error) => {
-      console.error('Error streaming admit card:', error);
-      if (!res.headersSent) {
-        res.status(500).json({ error: 'Failed to stream admit card' });
-      }
-    });
-
-    readStream.on('end', () => {
-      console.log('Admit card streamed successfully');
-    });
   } catch (error) {
-    console.error('Error fetching admit card:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ error: `Failed to fetch admit card: ${error.message}` });
-    }
-  } finally {
-    if (readStream) {
-      readStream.destroy();
-    }
+    console.error("❌ Error fetching admit card:", error);
+    res.status(500).json({ error: "Failed to fetch admit card" });
   }
 }
 
