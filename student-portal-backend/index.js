@@ -22,6 +22,7 @@ import { School } from "./school.js";
 import { convertXlsxToMongoDbForSchool } from "./excelToMongoForSchool.js";
 import { Admin } from "./admin.js";
 import { Int32 } from "mongodb";
+import { MongoClient, GridFSBucket, ObjectId } from "mongodb";
 
 dotenv.config();
 
@@ -367,52 +368,37 @@ app.put("/student", async (req, res) => {
   }
 });
 
+
+
 // API to fetch admit-card
-app.post("/fetch-admit-card", async (req, res) => {
+app.post('/fetch-admit-card', async (req, res) => {
   try {
-    const { mobNo, level /*, session */ } = req.body;
+    const { mobNo, level } = req.body;
 
-    let Level = "";
+    const Level = level === 'basic' ? "L1" : "L2"
 
-    if (level === "basic") Level = "L1"
-    else Level = "L2"
-
-    if (!mobNo || !Level || !["L1", "L2"].includes(Level)) {
+    // Validate inputs
+    if (!mobNo || !level || !['L1', 'L2'].includes(Level)) {
       return res
         .status(400)
-        .json({ error: "Mobile number and valid level (L1 or L2) are required" });
+        .json({ error: 'Mobile number and valid level (basic/L1 or L2) are required' });
     }
 
-    let studentId = await STUDENT_LATEST.findOne({ mobNo });
+    let studentData = await STUDENT_LATEST.findOne({ mobNo }).lean();
 
-
-    // let studentData = studentCache[mobNo] || (await fetchDataByMobile(mobNo));
-    // if (!studentData || !studentData.mobNo) {
-    //   return res
-    //     .status(404)
-    //     .json({ error: "No student found with this mobile number" });
-    // }
-    // studentCache[mobNo] = studentData;
-
-    if (!studentId) {
-      return res
-        .status(400)
-        .json({ error: "Invalid student details: student ID missing" });
+    // Convert studentId to ObjectId
+    let objectId;
+    try {
+      objectId = new ObjectId(studentData._id);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid student ID format' });
     }
 
-    // Convert studentId to ObjectId if it's a string
-    // let objectId;
-    // try {
-    //   objectId = objectId(studentId);
-    // } catch (error) {
-    //   return res.status(400).json({ error: "Invalid student ID format" });
-    // }
-
-    await fetchAdmitCardFromDB(studentId._id, studentId.studentName, Level, res);
+    await fetchAdmitCardFromDB(objectId, studentData.studentName, Level, res);
   } catch (error) {
-    console.error("Error processing request:", error);
+    console.error('Error processing request:', error);
     if (!res.headersSent) {
-      res.status(500).json({ error: "Failed to process request" });
+      res.status(500).json({ error: 'Failed to process request' });
     }
   }
 });
@@ -684,7 +670,6 @@ app.post("/upload-schooldata", upload.single("file"), async (req, res) => {
 
 // API to upload student data in bulk
 app.post("/upload-studentData", upload.single("file"), async (req, res) => {
-  console.log("CHAL TO RAHA HAI");
 
   if (!req.file) {
     return res.status(400).json({ message: "Please upload a CSV file" });
