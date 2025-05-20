@@ -516,6 +516,8 @@ app.post("/admit-card", async (req, res) => {
     return res.status(400).json({ error: "School code, level, and exam date are required" });
   }
 
+  const school = await School.findOne({ schoolCode });
+
   try {
     const dbResponse = await dbConnection();
     if (dbResponse.status !== "success") {
@@ -553,7 +555,7 @@ app.post("/admit-card", async (req, res) => {
     });
 
     // Generate admit cards with examDate
-    const generateResults = await generateAdmitCard(cachedStudents, level, /* session, */ examDate);
+    const generateResults = await generateAdmitCard(cachedStudents, level, /* session, */ examDate, school.schoolName);
 
     // Upload admit cards
     const uploadResults = await uploadAdmitCard(cachedStudents, level, db, examDate);

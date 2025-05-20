@@ -48,7 +48,7 @@ async function dbConnection() {
   }
 }
 
-async function generateAdmitCard(students, level, /* session, */ examDate) {
+async function generateAdmitCard(students, level, /* session, */ examDate, schoolName) {
   try {
     const outputDir = "./outputs";
     if (!fs.existsSync(outputDir)) {
@@ -95,7 +95,7 @@ async function generateAdmitCard(students, level, /* session, */ examDate) {
           schoolCode: student.schoolCode,
           mobile: student.mobNo,
           city: student.city || "N/A",
-          school: student.school || "Unknown School",
+          school: schoolName || "Unknown School",
           state: student.state || "N/A",
           country: student.country || "India",
           examCenter: student.examCenter || "To Be Assigned",
