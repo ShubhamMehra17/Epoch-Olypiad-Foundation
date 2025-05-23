@@ -75,11 +75,12 @@ async function generateAdmitCard(students, level, /* session, */ examDate, schoo
     for (const student of students) {
       const outputPath = `./outputs/admitCard_${student.studentName}-${level}-${student._id}.png`;
 
-      const IAOL = student[`IAOL${subjectLevel}`] === "1";
-      const ITSTL = student[`ITSTL${subjectLevel}`] === "1";
-      const IMOL = student[`IMOL${subjectLevel}`] === "1";
-      const IGKOL = student[`IGKOL${subjectLevel}`] === "1";
-      const IENGOL = student[`IENGOL${subjectLevel}`] === "1";
+      const levelSuffix = level === "L1" ? "1" : "2";
+      const IAOL = student[`IAOL${levelSuffix}`] === "1";
+      const ITSTL = student[`ITSTL${levelSuffix}`] === "1";
+      const IMOL = student[`IMOL${levelSuffix}`] === "1";
+      const IGKOL = student[`IGKOL${levelSuffix}`] === "1";
+      const IENGOL = student[`IENGOL${levelSuffix}`] === "1";
 
       await nodeHtmlToImage({
         output: outputPath,
