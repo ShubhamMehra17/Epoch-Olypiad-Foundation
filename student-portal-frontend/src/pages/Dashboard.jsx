@@ -34,15 +34,23 @@ const AccordionSection = ({ title, children }) => {
 
 const Dashboard = () => {
   const student = useSelector((state) => state.auth.user);
+  const [admitCard, setAdmitCard] = useState({});
 
   const phone = student["Mob No"];
 
+  console.log(admitCard);
+
   useEffect(() => {
     const fetchAdmitCard = async () => {
-      const res = await axios.get(`${BASE_API_URL}/student-admit-card/${phone}`);
-    }
-    fetchAdmitCard()
-  }, [])
+      try {
+        const res = await axios.get(`${BASE_API_URL}/student-admit-card/${phone}`);
+        setAdmitCard(res.data.result);
+      } catch (error) {
+        console.error("Error fetching admit card:", error);
+      }
+    };
+    fetchAdmitCard();
+  }, [phone]);
 
   const hasParticipated = (key) => student?.[key] === "1";
 
@@ -59,7 +67,23 @@ const Dashboard = () => {
   }));
 
   return (
-    <div className="flex-1 w-full min-h-screen lg:p-8 p-4">
+    <div className="flex-1 w-full min-h-screen lg:p-2 p-4">
+      {/* Admit Card Notification */}
+      {Object.keys(admitCard).length > 0 && (
+        <div className="mb-6 p-4 bg-green-100 text-green-800 rounded-lg shadow-md animate-fade-in">
+          <p className="font-semibold">
+            Admit Card Available!{" "}
+            <a
+              href="/admit-card"
+              rel="noopener noreferrer"
+              className="underline hover:text-green-600 transition-colors duration-200"
+            >
+              Click here to download
+            </a>
+          </p>
+        </div>
+      )}
+
       {/* HEADER */}
       <div className="flex justify-between items-center mb-8 animate-fade-in">
         <div className="flex items-center gap-4">

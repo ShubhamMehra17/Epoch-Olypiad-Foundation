@@ -10,6 +10,7 @@ const AdmitCard = () => {
   const [selectedLevel, setSelectedLevel] = useState("");
   const [admitCardImage, setAdmitCardImage] = useState(null);
   const [admitCardBlob, setAdmitCardBlob] = useState(null);
+  const [error, setError] = useState(false);
 
   const fetchAdmitCard = async () => {
     try {
@@ -28,11 +29,13 @@ const AdmitCard = () => {
         const imageUrl = URL.createObjectURL(blob);
         setAdmitCardImage(imageUrl);
         setAdmitCardBlob(blob);
+        setError(false);
       } else {
-        console.error("Failed to fetch admit card.");
+        setError(true);
       }
     } catch (error) {
       console.error("Error fetching admit card:", error);
+      setError(true);
     }
   };
 
@@ -123,7 +126,12 @@ const AdmitCard = () => {
         <select
           className="w-full bg-blue-50 border border-blue-200 rounded-md px-4 py-2 text-sm transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-300"
           value={selectedLevel}
-          onChange={(e) => setSelectedLevel(e.target.value)}
+          onChange={(e) => {
+            setSelectedLevel(e.target.value);
+            setAdmitCardImage(null); // Reset image on level change
+            setAdmitCardBlob(null); // Reset blob on level change
+            setError(false); // Reset error on level change
+          }}
         >
           <option value="">Select Level</option>
           <option value="L1">Level 1</option>
@@ -133,12 +141,22 @@ const AdmitCard = () => {
 
       {/* Admit Card Container */}
       <div className="flex items-center justify-center">
-        <div className="relative w-full max-w-3xl animate-slideUp transition-all hover:shadow-2xl">
+        <div className="relative w-full max-w-3xl animate-slideUp transition-all">
           {admitCardImage ? (
             <img src={admitCardImage} alt="Admit Card" className="w-full" />
           ) : (
             <div className="flex items-center justify-center h-64">
-              {selectedLevel ? "Loading Admit Card..." : "Please select Level"}
+              {selectedLevel && error ? (
+                <div className="p-4 bg-red-100 text-red-800 rounded-lg shadow-md">
+                  <p className="font-semibold">
+                    Admit Card Not Found. Please contact support for assistance.
+                  </p>
+                </div>
+              ) : selectedLevel ? (
+                "Loading Admit Card..."
+              ) : (
+                "Please select Level"
+              )}
             </div>
           )}
         </div>
