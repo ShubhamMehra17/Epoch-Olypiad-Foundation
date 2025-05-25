@@ -3,6 +3,7 @@ import { Download, FileText } from "lucide-react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { BASE_API_URL } from "../Api";
+import jsPDF from "jspdf";
 
 const AdmitCard = () => {
   const student = useSelector((state) => state.auth.user);
@@ -54,7 +55,50 @@ const AdmitCard = () => {
 
   const handleDownloadPDF = () => {
     if (admitCardBlob) {
-      downloadFile(admitCardBlob, "admit-card.pdf", "application/pdf");
+      // Create a new jsPDF instance
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      // Load the PNG blob as an image
+      const img = new Image();
+      img.src = URL.createObjectURL(admitCardBlob);
+      img.onload = () => {
+        // Calculate dimensions to fit the image within A4 (210mm x 297mm)
+        const imgWidth = img.width;
+        const imgHeight = img.height;
+        const pageWidth = 210; // A4 width in mm
+        const pageHeight = 297; // A4 height in mm
+        const margin = 10; // Margin in mm
+        const maxWidth = pageWidth - 2 * margin;
+        const maxHeight = pageHeight - 2 * margin;
+
+        // Scale the image to fit within the page
+        let pdfWidth = imgWidth;
+        let pdfHeight = imgHeight;
+        const aspectRatio = imgWidth / imgHeight;
+
+        if (pdfWidth > maxWidth) {
+          pdfWidth = maxWidth;
+          pdfHeight = pdfWidth / aspectRatio;
+        }
+        if (pdfHeight > maxHeight) {
+          pdfHeight = maxHeight;
+          pdfWidth = pdfHeight * aspectRatio;
+        }
+
+        // Center the image on the page
+        const x = (pageWidth - pdfWidth) / 2;
+        const y = (pageHeight - pdfHeight) / 2;
+
+        // Add the image to the PDF
+        pdf.addImage(img, "PNG", x, y, pdfWidth, pdfHeight);
+
+        // Download the PDF
+        pdf.save("admit-card.pdf");
+      };
     }
   };
 

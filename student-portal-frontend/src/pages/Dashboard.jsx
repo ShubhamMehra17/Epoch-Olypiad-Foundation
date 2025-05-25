@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import axios from "axios";
+import { BASE_API_URL } from "../Api";
 
 function InfoField({ label, value, delay = 0 }) {
   return (
@@ -32,6 +34,15 @@ const AccordionSection = ({ title, children }) => {
 
 const Dashboard = () => {
   const student = useSelector((state) => state.auth.user);
+
+  const phone = student["Mob No"];
+
+  useEffect(() => {
+    const fetchAdmitCard = async () => {
+      const res = await axios.get(`${BASE_API_URL}/student-admit-card/${phone}`);
+    }
+    fetchAdmitCard()
+  }, [])
 
   const hasParticipated = (key) => student?.[key] === "1";
 
@@ -123,11 +134,10 @@ const Dashboard = () => {
                 {subjects.map((subject, idx) => (
                   <td key={idx} className="px-6 py-4">
                     <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        hasParticipated(`${subject.prefix} Basic`)
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${hasParticipated(`${subject.prefix} Basic`)
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-600"
+                        }`}
                     >
                       {hasParticipated(`${subject.prefix} Basic`) ? "Yes" : "Not participated"}
                     </span>
@@ -152,11 +162,10 @@ const Dashboard = () => {
                 {subjects.map((subject, idx) => (
                   <td key={idx} className="px-6 py-4">
                     <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        hasParticipated(`${subject.prefix} Advance`)
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${hasParticipated(`${subject.prefix} Advance`)
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-600"
+                        }`}
                     >
                       {hasParticipated(`${subject.prefix} Advance`)
                         ? subject.display === "IIMOL"
@@ -195,11 +204,10 @@ const Dashboard = () => {
                 {subjects.map((subject, idx) => (
                   <td key={idx} className="px-6 py-4">
                     <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        hasParticipated(`${subject.prefix} Basic Book`)
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${hasParticipated(`${subject.prefix} Basic Book`)
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-600"
+                        }`}
                     >
                       {hasParticipated(`${subject.prefix} Basic Book`) ? "Yes" : "No"}
                     </span>
@@ -207,7 +215,7 @@ const Dashboard = () => {
                 ))}
                 <td className="px-6 py-4 text-gray-600">
                   {subjects.some((subject) => hasParticipated(`${subject.prefix} Basic Book`)) &&
-                  student.bookStatus
+                    student.bookStatus
                     ? `Delivered on ${student.bookStatus}`
                     : "Not delivered"}
                 </td>
