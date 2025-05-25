@@ -48,7 +48,7 @@ async function dbConnection() {
   }
 }
 
-async function generateAdmitCard(students, level, /* session, */ examDate, schoolName) {
+async function generateAdmitCard(students, level, /* session, */ examDate, school) {
   try {
     const outputDir = "./outputs";
     if (!fs.existsSync(outputDir)) {
@@ -82,6 +82,10 @@ async function generateAdmitCard(students, level, /* session, */ examDate, schoo
       const IGKOL = student[`IGKOL${levelSuffix}`] === "1";
       const IENGOL = student[`IENGOL${levelSuffix}`] === "1";
 
+      console.log(student);
+
+      console.log(IAOL, ITSTL, IGKOL, IMOL, IENGOL)
+
       await nodeHtmlToImage({
         output: outputPath,
         html: fs.readFileSync(templatePath, "utf8"),
@@ -96,12 +100,14 @@ async function generateAdmitCard(students, level, /* session, */ examDate, schoo
           schoolCode: student.schoolCode,
           mobile: student.mobNo,
           city: student.city || "N/A",
-          school: schoolName || "Unknown School",
+          school: school.schoolName || "Unknown School",
           state: student.state || "N/A",
           country: student.country || "India",
           examCenter: student.examCenter || "To Be Assigned",
           level: suffix,
           examDate: examDate || "N/A",
+          classTeacher: school.incharge || "N/A",
+          principal: school.principalName || "N/A",
           qrUrl:
             "https://api.qrserver.com/v1/create-qr-code/?data=https://wa.me/919999999999&size=100x100",
           IAOL,

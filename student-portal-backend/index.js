@@ -512,21 +512,21 @@ async function fetchStudentsByFilters({ schoolCode, level }) {
         { IAOL2: "1" },
         { ITSTL2: "1" },
         { IMOL2: "1" },
+        { IGKOL2: "1" },
         { IENGOL2: "1" },
       ];
     } else {
       throw new Error("Invalid level: must be L1 or L2");
     }
 
-    // Execute the query
+    // Execute the query 
     const students = await STUDENT_LATEST.find(query)
-      .select("rollNo studentName schoolCode class section fatherName motherName dob mobNo")
+      .select("rollNo studentName schoolCode class section fatherName motherName dob mobNo IAOL1 ITSTL1 IMOL1 IGKOL1 IENGOL1 IAOL2 ITSTL2 IMOL2 IGKOL2 IENGOL2")
       .lean();
 
     if (!students || students.length === 0) {
       return [];
     }
-
     return students;
   } catch (error) {
     console.error("Error fetching students by filters:", error);
@@ -581,7 +581,7 @@ app.post("/admit-card", async (req, res) => {
     });
 
     // Generate admit cards with examDate
-    const generateResults = await generateAdmitCard(cachedStudents, level, /* session, */ examDate, school.schoolName);
+    const generateResults = await generateAdmitCard(cachedStudents, level, /* session, */ examDate, school);
 
     // Upload admit cards
     const uploadResults = await uploadAdmitCard(cachedStudents, level, db, examDate);
@@ -613,6 +613,10 @@ app.post("/admit-card", async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
+app.get("/student-admit-card", async (req,res) => {
+  const {mobNo} = rew.body;
+})
 
 // API to generate & upload certificate or admit card
 app.post("/generate/:type", async (req, res) => {
