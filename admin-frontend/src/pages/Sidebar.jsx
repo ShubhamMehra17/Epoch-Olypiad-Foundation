@@ -156,7 +156,7 @@ const Sidebar = () => {
 
         <MenuItem
           icon={<UserPlus size={20} />}
-          text="All Kindergarten Students"
+          text="All KG Students"
           href="/allkindargartenStudents"
           active={location.pathname === "/allkindargartenStudents"}
           onClick={closeSidebar}
@@ -164,7 +164,7 @@ const Sidebar = () => {
 
         <MenuItem
           icon={<UserPlus size={20} />}
-          text="Kindergarten Student"
+          text="KG Student"
           href="/kindargartenStudent"
           active={location.pathname === "/kindargartenStudent"}
           onClick={closeSidebar}
@@ -172,7 +172,7 @@ const Sidebar = () => {
 
         <MenuItem
           icon={<UserPlus size={20} />}
-          text="Upload Kindergarten Student"
+          text="Upload KG Student"
           href="/uploadKindergartenStudentData"
           active={location.pathname === "/uploadKindergartenStudentData"}
           onClick={closeSidebar}
