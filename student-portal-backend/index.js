@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import cors from "cors";
 import fs from "fs/promises";
+import jwt from "jsonwebtoken"
 
 import dotenv from "dotenv";
 import { fetchDataByMobile } from "./service.js";
@@ -1253,5 +1254,7 @@ app.get("/health", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is UP and RUNNING on port ${PORT}`);
 });
+
+
 
 export default app;
