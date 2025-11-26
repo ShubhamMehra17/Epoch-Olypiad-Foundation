@@ -1,7 +1,7 @@
 @Library('shared-library') _
 
 pipeline {
-    agent any
+    agent ecs-agent
 
     environment {
         AWS_REGION     = "ap-south-1"
