@@ -39,5 +39,17 @@ pipeline {
                 )
             }
         }
+
+       stage('Trivy Image Scan') {
+            steps {
+                trivyScan(
+                    imageName: 'epoch-olympiad',
+                    imageTag: "${BUILD_NUMBER}",
+                    severity: 'CRITICAL,HIGH',
+                    trivyUrl: 'http://localhost:4954',
+                    failBuild: true
+                )
+            }
+        }
     }
 }
