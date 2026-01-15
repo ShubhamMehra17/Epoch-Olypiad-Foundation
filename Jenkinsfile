@@ -4,7 +4,7 @@ pipeline {
     agent any
 
     tools {
-        sonarScanner 'sonar-scanner'
+        sonarQube 'sonar-scanner'
     }
 
     options {
