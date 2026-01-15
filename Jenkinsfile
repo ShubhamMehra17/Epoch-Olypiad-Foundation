@@ -17,7 +17,12 @@ pipeline {
             ],
             description: 'Select which part of the pipeline to run'
         )
-    }
+        string(
+        name: 'IMAGE_TAG',
+        defaultValue: '',
+        description: 'Docker image tag to scan (leave empty to use BUILD_NUMBER)'
+    )
+  }
       
     stages {
 
@@ -58,13 +63,17 @@ pipeline {
                 }
             }
             steps {
+                script{
+                     def finalTag = params.IMAGE_TAG?.trim() ? params.IMAGE_TAG : "${BUILD_NUMBER}"
+                    
                 trivyScan(
                     imageName: 'epoch-olympiad',
-                    imageTag: "${BUILD_NUMBER}",
+                    imageTag: finalTag ,
                     severity: 'CRITICAL,HIGH',
                     failBuild: true
                 )
             }
         }
+       }
     }
 }
