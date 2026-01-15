@@ -13,7 +13,7 @@ pipeline {
                 withSonarQubeEnv('sonar-local') {
                     sh '''
                       sonar-scanner \
-                        -Dsonar.projectKey=demo-app \
+                        -Dsonar.projectKey=Epoch_Olympiad \
                         -Dsonar.sources=.
                     '''
                 }
