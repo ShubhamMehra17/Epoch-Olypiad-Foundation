@@ -3,9 +3,6 @@
 pipeline {
     agent any
 
-    tools {
-        sonarRunner 'sonar-scanner'
-    }
 
     options {
         timestamps()
@@ -22,11 +19,11 @@ pipeline {
         stage('SonarQube Scan') {
             steps {
                 withSonarQubeEnv('sonar-local') {
-                    sh """
+                    sh '''
                       sonar-scanner \
                         -Dsonar.projectKey=Epoch_Olympiad \
                         -Dsonar.sources=.
-                    """
+                    '''
                 }
             }
         }
