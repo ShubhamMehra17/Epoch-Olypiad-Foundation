@@ -10,12 +10,15 @@ pipeline {
 
         stage('SonarQube Scan') {
             steps {
-                withSonarQubeEnv('sonar-local') {
-                    sh '''
-                      sonar-scanner \
-                        -Dsonar.projectKey=Epoch_Olympiad \
-                        -Dsonar.sources=.
-                    '''
+                script {
+                    def scannerHome = tool 'sonar-scanner'
+                    withSonarQubeEnv('sonar-local') {
+                        sh """
+                          ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=Epoch_Olympiad \
+                            -Dsonar.sources=.
+                        """
+                    }
                 }
             }
         }
