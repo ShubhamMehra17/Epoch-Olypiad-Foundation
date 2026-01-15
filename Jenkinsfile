@@ -1,7 +1,18 @@
+@Library('shared_library') _
+
 pipeline {
     agent any
 
+    tools {
+        sonarScanner 'sonar-scanner'
+    }
+
+    options {
+        timestamps()
+    }
+
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -10,22 +21,22 @@ pipeline {
 
         stage('SonarQube Scan') {
             steps {
-                script {
-                    def scannerHome = tool 'sonar-scanner'
-                    withSonarQubeEnv('sonar-local') {
-                        sh """
-                          ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=Epoch_Olympiad \
-                            -Dsonar.sources=.
-                        """
-                    }
+                withSonarQubeEnv('sonar-local') {
+                    sh """
+                      sonar-scanner \
+                        -Dsonar.projectKey=Epoch_Olympiad \
+                        -Dsonar.sources=.
+                    """
                 }
             }
         }
 
-        stage('Quality Gate') {
+        stage('Build Docker Image') {
             steps {
-                waitForQualityGate abortPipeline: true
+                dockerBuild(
+                    imageName: 'epoch-olympiad',
+                    imageTag: "${BUILD_NUMBER}"
+                )
             }
         }
     }
