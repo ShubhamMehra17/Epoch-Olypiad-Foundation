@@ -7,7 +7,18 @@ pipeline {
     options {
         timestamps()
     }
-
+    
+    parameters {
+        choice(
+            name: 'RUN_STAGE',
+            choices: [
+                'FULL_PIPELINE',
+                'ONLY_TRIVY_SCAN'
+            ],
+            description: 'Select which part of the pipeline to run'
+        )
+    }
+      
     stages {
 
         stage('Checkout') {
@@ -41,6 +52,11 @@ pipeline {
         }
 
        stage('Trivy Image Scan') {
+           when {
+                expression {
+                    params.RUN_STAGE == 'ONLY_TRIVY_SCAN'
+                }
+            }
             steps {
                 trivyScan(
                     imageName: 'epoch-olympiad',
