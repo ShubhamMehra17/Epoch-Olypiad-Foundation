@@ -17,13 +17,14 @@ pipeline {
         }
 
         stage('SonarQube Scan') {
-            steps {
+           script {
+                def scannerHome = tool 'sonar-scanner'
                 withSonarQubeEnv('sonar-local') {
-                    sh '''
-                      sonar-scanner \
+                    sh """
+                      ${scannerHome}/bin/sonar-scanner \
                         -Dsonar.projectKey=Epoch_Olympiad \
                         -Dsonar.sources=.
-                    '''
+                    """
                 }
             }
         }
